@@ -1,0 +1,13 @@
+{
+
+        "topic_name": "topic-configured",
+        "partitions_count": 2,
+        "replication_factor": 1,
+        "configs": [
+          {
+            "name": "cleanup.policy",
+            "value": "compact"
+          }
+        ]
+ 
+  }

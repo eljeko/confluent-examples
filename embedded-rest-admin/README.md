@@ -37,8 +37,21 @@ Get topics list again
 
     curl --silent -X GET http://localhost:8090/kafka/v3/clusters/$CLUSTER_ID/topics|jq -r '.data[].topic_name'
 
+Describe the topic
+
+    curl --silent -X GET http://localhost:8090/kafka/v3/clusters/$CLUSTER_ID/topics/test-rest-topic | jq
+
+
 Output should be:
 
     _confluent-command
     _schemas
     test-rest-topic
+
+Create a topic with specific configuration from file
+
+    curl --silent -X POST -H "Content-Type: application/json" -d @topic-configured http://localhost:8090/kafka/v3/clusters/$CLUSTER_ID/topics | jq
+
+Check topic created
+
+    curl --silent -X GET http://localhost:8090/kafka/v3/clusters/$CLUSTER_ID/topics/topic-configured | jq

@@ -1,0 +1,100 @@
+---
+version: '2'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.1
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker:
+    image: confluentinc/cp-server:7.3.1
+    hostname: broker
+    container_name: broker
+    depends_on:
+      - zookeeper
+    ports:
+      - "9091:9091"
+      - "19091:19091"
+      - "8090:8090"
+    volumes:
+      - /Users/eljeko/Confluent/Customer/Leonardo/Telespazio/jmx-exporter/:/usr/share/jmx-exporter
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_RACK: "r1"
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker:9091,CLIENT://broker:19091
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9991      
+      # Schema Validation
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      # Confluent Metrics Reporter
+      #KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      #CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:9091
+      #CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      #CONFLUENT_METRICS_ENABLE: 'true'
+      #CONFLUENT_METRICS_REPORTER_TOPIC_CREATE: 'true'
+      # Self Balancing cluster
+      #KAFKA_CONFLUENT_BALANCER_ENABLE: 'true'
+      #KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      #KAFKA_CONFLUENT_BALANCER_HEAL_BROKER_FAILURE_THRESHOLD_MS: 30000
+      # Kafka Admin rest listener      
+      KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: http://0.0.0.0:8090
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'      
+  
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.3.1
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - broker
+    ports:
+      - "8081:8081"
+    volumes:
+      - /Users/eljeko/Confluent/Customer/Leonardo/Telespazio/jmx-exporter/:/usr/share/jmx-exporter
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: broker:19091
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+  
+  # control-center:
+  #   image: confluentinc/cp-enterprise-control-center:7.3.1
+  #   container_name: control-center
+  #   restart: always
+  #   depends_on:
+  #     - zookeeper
+  #     - broker
+  #   ports:
+  #     - "9021:9021"
+  #   environment:
+  #     CONTROL_CENTER_BOOTSTRAP_SERVERS: broker:19091
+  #     CONTROL_CENTER_REPLICATION_FACTOR: 1
+  #     CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_REPLICATION: 1
+  #     CONTROL_CENTER_INTERNAL_TOPICS_REPLICATION: 1
+  #     CONTROL_CENTER_COMMAND_TOPIC_REPLICATION: 1
+  #     CONTROL_CENTER_METRICS_TOPIC_REPLICATION: 1
+  #     CONTROL_CENTER_STREAMS_NUM_STREAM_THREADS: 1
+  #     CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: 'connect:8083'
+  #     CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+  #     CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
+  #     CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+  #     CONTROL_CENTER_STREAMS_CONSUMER_REQUEST_TIMEOUT_MS: "960032"
+  #     CONTROL_CENTER_STREAMS_CPREST_URL: "http://broker:8090"
+  #     CONTROL_CENTER_ID: "MY_C3"
+
+volumes:
+  db:
+    driver: local

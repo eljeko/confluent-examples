@@ -12,8 +12,9 @@ control-center is commented, uncomment it to play with the UI while exeperimenti
 
 The rest url will be [http://localhost:8090/kafka/v3/clusters](http://localhost:8090/kafka/v3/clusters)
 
-
 # Play with topics
+
+This mini tutorial use [jq](https://jqlang.github.io/jq/)
 
 set cluster_id variable
 

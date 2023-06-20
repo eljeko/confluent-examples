@@ -10,7 +10,7 @@ Wait for the components to startup:
 
 control-center is commented, uncomment it to play with the UI while exeperimenting with REST API
 
-The rest url will be [http://localhost:8090/kafka/v3/clusters]()
+The rest url will be [http://localhost:8090/kafka/v3/clusters](http://localhost:8090/kafka/v3/clusters)
 
 
 # Play with topics

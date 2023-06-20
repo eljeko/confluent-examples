@@ -14,7 +14,7 @@ The rest url will be [http://localhost:8090/kafka/v3/clusters](http://localhost:
 
 # Play with topics
 
-This mini tutorial use [jq](https://jqlang.github.io/jq/)
+This mini tutorial uses [jq](https://jqlang.github.io/jq/)
 
 set cluster_id variable
 

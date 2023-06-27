@@ -1,0 +1,3 @@
+FROM cnfldemos/tools:0.3
+
+RUN curl --http1.1 -L https://cnfl.io/cli | sh -s -- -b /usr/bin v3.0.1

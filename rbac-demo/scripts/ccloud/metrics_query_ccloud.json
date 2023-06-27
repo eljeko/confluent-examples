@@ -1,0 +1,28 @@
+{
+  "aggregations": [
+      {
+          "metric": "io.confluent.kafka.server/cluster_link_mirror_topic_bytes"
+      }
+  ],
+  "filter": {
+      "filters": [
+          {
+               "field": "metric.link_name",
+               "op": "EQ",
+               "value": "cp-cc-cluster-link"
+          },
+          {
+              "field": "resource.kafka.id",
+              "op": "EQ",
+              "value": "<CCLOUD_CLUSTER_ID>"
+          }
+      ],
+      "op": "AND"
+  },
+  "intervals": ["now-1h/now+1h"],
+  "granularity": "PT1H",
+  "group_by": [
+      "metric.topic"
+  ],
+  "limit": 5
+}

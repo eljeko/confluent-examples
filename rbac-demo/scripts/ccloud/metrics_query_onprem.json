@@ -1,0 +1,24 @@
+{
+  "aggregations": [
+      {
+          "agg": "SUM",
+          "metric": "io.confluent.kafka.server/received_bytes"
+      }
+  ],
+  "filter": {
+      "filters": [
+          {
+               "field": "metric.topic",
+               "op": "EQ",
+               "value": "wikipedia.parsed"
+          }
+      ],
+      "op": "AND"
+  },
+  "intervals": ["now-1h/now+1h"],
+  "granularity": "PT1M",
+  "group_by": [
+      "metric.topic"
+  ],
+  "limit": 5
+}

@@ -63,7 +63,7 @@ confluent context update --name cp
 confluent iam rbac role-binding create \
   --principal User:connectorSA \
   --role ClusterAdmin \
-  --kafka-cluster-id $CP_CLUSTER_ID
+  --kafka-cluster $CP_CLUSTER_ID
 
 
 # Create the cp half of link

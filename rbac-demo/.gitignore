@@ -1,3 +1,11 @@
 docs
 kstreams-app
-rbac-demo.tar.gz
+*.crt
+*.der
+*.csr
+*.key
+*.p12
+*.jks
+*.log
+*.pem
+*_creds

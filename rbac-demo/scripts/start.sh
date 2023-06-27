@@ -184,6 +184,13 @@ curl -u mds:mds -X POST "https://localhost:8091/security/1.0/rbac/principals" --
 # Do poststart_checks
 poststart_checks
 
+echo -e "\nCopy certificates into tools container"
+docker cp security/barnie.key tools:/barnie.key
+docker cp security/barnie.certificate.pem tools:/barnie.certificate.pem
+docker cp security/charlie.key tools:/charlie.key
+docker cp security/charlie.certificate.pem tools:/charlie.certificate.pem
+docker cp security/snakeoil-ca-1.crt tools:/snakeoil-ca-1.crt
+
 
 cat << EOF
 
@@ -209,6 +216,6 @@ EOF
 #     https://docs.confluent.io/platform/current/tutorials/cp-demo/docs/hybrid-cloud.html
 
 #Use Confluent Cloud promo code CPDEMO50 to receive \$50 free usage
-----------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------
 
 #EOF

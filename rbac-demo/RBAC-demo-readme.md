@@ -13,6 +13,7 @@ charlie -> can't see antyhing
 Explore control center with user:
 
 U: controlcenterAdmin
+
 P: controlcenterAdmin
 
 
@@ -90,12 +91,13 @@ Check again Alice role bindings (You can add -o json or yaml now to see the outp
 
     confluent iam rbac role-binding list --principal User:alice --kafka-cluster $KAFKA_CLUSTER_ID -o json|jq
 
+Try to create a topic with alcie:
+
+    confluent kafka topic create notifications --partitions 2 --replication-factor 1 --url https://restproxy:8086
+
+It fails
+
 **Logout alice from Control Center**
-
-# Login with barnie into Control Center
-
-Show he can't see anything on control center
-
 
 # Create new topic notifications
 
@@ -110,7 +112,7 @@ Login as contolcenter admin:
     U: controlcenterAdmin
     P: controlcenterAdmin
 
-Create new topic (with through REST proxy)
+Create new topic (through REST proxy)
 
     confluent kafka topic create notifications --partitions 2 --replication-factor 1 --url https://restproxy:8086
 
@@ -144,7 +146,7 @@ Login as Alice:
     U: alice
     P: alice-secret
 
-Allow barnie group to access ReST api:
+Allow group to access ReST api:
 
     confluent kafka acl create --allow --principal "User:barnie" --operation READ --consumer-group "*" --url https://restproxy:8086
 
@@ -156,7 +158,7 @@ Assaing the role ResourceOwner on topic notification to barnie:
 
 Check the roles
 
-    confluent iam rbac role-binding list --principal User:alice --kafka-cluster $KAFKA_CLUSTER_ID -o json|jq
+    confluent iam rbac role-binding list --principal User:barnie --kafka-cluster $KAFKA_CLUSTER_ID -o json|jq
 
 ## Test again with correct roles for barnie
 
@@ -214,7 +216,9 @@ In a non-interactive login,```CONFLUENT_PLATFORM_MDS_URL``` replaces the --url f
 
     confluent iam rbac role-binding list --kafka-cluster $KAFKA_CLUSTER_ID  --principal User:barnie  --role ResourceOwner -o json|jq
 
-    confluent iam user list  --kafka-cluster $KAFKA_CLUSTER_ID
+Get all the user for a role:
+
+    confluent iam rbac role-binding list  --role ResourceOwner   --kafka-cluster $KAFKA_CLUSTER_ID
 
 # sample client.properties
 

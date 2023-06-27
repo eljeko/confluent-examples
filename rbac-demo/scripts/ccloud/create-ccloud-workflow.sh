@@ -46,8 +46,8 @@ sleep 90
 #     --principal $CONNECTOR_SUBMITTER \
 #     --role ResourceOwner \
 #     --resource Connector:replicate-topic-to-ccloud \
-#     --kafka-cluster-id $KAFKA_CLUSTER_ID \
-#     --connect-cluster-id $CONNECT"
+#     --kafka-cluster $KAFKA_CLUSTER_ID \
+#     --connect-cluster $CONNECT"
 # ${VALIDATE_DIR}/../connectors/submit_replicator_to_ccloud_config.sh
 
 # # Verify Replicator to Confluent Cloud has started

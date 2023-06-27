@@ -5,3 +5,8 @@ docker-compose exec connect kafka-avro-console-consumer \
   --group wikipedia.test \
   --topic alicetopic \
   --max-messages 1
+
+
+
+
+  confluent iam rbac role-binding create --principal superUser --role SystemAdmin --kafka-cluster $KAFKA_CLUSTER_ID --schema-registry-cluster-id $SR

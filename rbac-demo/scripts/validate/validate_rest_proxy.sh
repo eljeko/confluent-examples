@@ -39,8 +39,8 @@ docker-compose exec tools bash -c "confluent iam rbac role-binding create \
     --principal $CLIENT_PRINCIPAL \
     --role ResourceOwner \
     --resource Subject:$subject \
-    --kafka-cluster-id $KAFKA_CLUSTER_ID \
-    --schema-registry-cluster-id $SR"
+    --kafka-cluster $KAFKA_CLUSTER_ID \
+    --schema-registry-cluster $SR"
 
 # Register a new Avro schema for topic 'users'
 docker-compose exec schemaregistry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --tlsv1.2 --cacert /etc/kafka/secrets/snakeoil-ca-1.crt --data '{ "schema": "[ { \"type\":\"record\", \"name\":\"user\", \"fields\": [ {\"name\":\"userid\",\"type\":\"long\"}, {\"name\":\"username\",\"type\":\"string\"} ]} ]" }' -u $CLIENT_NAME:$CLIENT_NAME https://schemaregistry:8085/subjects/$subject/versions
@@ -54,7 +54,7 @@ docker-compose exec tools bash -c "confluent iam rbac role-binding create \
     --principal $CLIENT_PRINCIPAL \
     --role DeveloperWrite \
     --resource Topic:$topic \
-    --kafka-cluster-id $KAFKA_CLUSTER_ID"
+    --kafka-cluster $KAFKA_CLUSTER_ID"
 
 docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.avro.v2+json" -H "Accept: application/vnd.kafka.v2+json" --cert /etc/kafka/secrets/restproxy.certificate.pem --key /etc/kafka/secrets/restproxy.key --tlsv1.2 --cacert /etc/kafka/secrets/snakeoil-ca-1.crt --data '{"value_schema_id": '"$schemaid"', "records": [{"value": {"user":{"userid": 1, "username": "Bunny Smith"}}}]}' -u $CLIENT_NAME:$CLIENT_NAME https://restproxy:8086/topics/$topic
 
@@ -66,13 +66,13 @@ docker-compose exec tools bash -c "confluent iam rbac role-binding create \
     --principal $CLIENT_PRINCIPAL \
     --role ResourceOwner \
     --resource Group:$group \
-    --kafka-cluster-id $KAFKA_CLUSTER_ID"
+    --kafka-cluster $KAFKA_CLUSTER_ID"
 
 docker-compose exec tools bash -c "confluent iam rbac role-binding create \
     --principal $CLIENT_PRINCIPAL \
     --role DeveloperRead \
     --resource Topic:$topic \
-    --kafka-cluster-id $KAFKA_CLUSTER_ID"
+    --kafka-cluster $KAFKA_CLUSTER_ID"
 
 # Note: Issue this command twice due to https://github.com/confluentinc/kafka-rest/issues/432
 docker-compose exec restproxy curl -X GET -H "Accept: application/vnd.kafka.avro.v2+json" --cert /etc/kafka/secrets/restproxy.certificate.pem --key /etc/kafka/secrets/restproxy.key --tlsv1.2 --cacert /etc/kafka/secrets/snakeoil-ca-1.crt -u $CLIENT_NAME:$CLIENT_NAME https://restproxy:8086/consumers/$group/instances/my_consumer_instance/records
@@ -94,7 +94,7 @@ docker-compose exec tools bash -c "confluent iam rbac role-binding create \
     --principal User:appSA \
     --role ResourceOwner \
     --resource Topic:dev_users \
-    --kafka-cluster-id $KAFKA_CLUSTER_ID"
+    --kafka-cluster $KAFKA_CLUSTER_ID"
 
 docker exec restproxy curl -s -X POST -H "Content-Type: application/json" -H "accept: application/json" -u appSA:appSA "https://kafka1:8091/kafka/v3/clusters/${KAFKA_CLUSTER_ID}/topics" -d "{\"topic_name\":\"dev_users\",\"partitions_count\":64,\"replication_factor\":2,\"configs\":[{\"name\":\"cleanup.policy\",\"value\":\"compact\"},{\"name\":\"compression.type\",\"value\":\"gzip\"}]}" --cert /etc/kafka/secrets/mds.certificate.pem --key /etc/kafka/secrets/mds.key --tlsv1.2 --cacert /etc/kafka/secrets/snakeoil-ca-1.crt | jq
 

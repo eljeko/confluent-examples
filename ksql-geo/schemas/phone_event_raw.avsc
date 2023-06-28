@@ -1,0 +1,56 @@
+{
+    "type": "record",
+    "name": "KsqlDataSourceSchema",
+    "namespace": "io.confluent.ksql.avro_schemas",
+    "fields": [
+        {
+            "name": "CUSTOMER_NAME",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "PHONE_MODEL",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "EVENT",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "STATE",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "LONG",
+            "type": [
+                "null",
+                "double"
+            ],
+            "default": null
+        },
+        {
+            "name": "LAT",
+            "type": [
+                "null",
+                "double"
+            ],
+            "default": null
+        }
+    ],
+    "connect.name": "io.confluent.ksql.avro_schemas.KsqlDataSourceSchema"
+}

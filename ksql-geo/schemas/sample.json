@@ -1,0 +1,8 @@
+{
+    "CUSTOMER_NAME": {"string":"Lindsey"},
+    "PHONE_MODEL": {"string":"iPhone 11 Pro"},
+    "EVENT": {"string":"dropped"},
+    "STATE": {"string":"NSW"},
+    "LONG": {"double":151.25664},
+    "LAT": {"double":-33.85995}
+}

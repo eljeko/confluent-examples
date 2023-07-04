@@ -19,6 +19,9 @@ Let’s start with the repair shop table. We want to be able to direct customers
 
 Insert repair shop data into the repair_center_tab table.
 
+
+    INSERT INTO repair_center_tab (repair_state, long, lat) VALUES ('IT', 41.9028, 12.4964);
+    
     INSERT INTO repair_center_tab (repair_state, long, lat) VALUES ('NSW', 151.1169, -33.863);
 
     INSERT INTO repair_center_tab (repair_state, long, lat) VALUES ('VIC', 145.1549, -37.9389);
@@ -122,7 +125,7 @@ Which should pass:
 
 # Let's play with data
 
-Run the setup.sh script to create all the statements.
+Run the ```setup.sh``` script to create all the statements.
 
 List the topics:
 
@@ -154,3 +157,14 @@ Generate random data with [jr](https://github.com/ugol/jr) and kafka-avro-consol
 Recevice messages:
 
     docker exec -i schema-registry kafka-avro-console-consumer --bootstrap-server broker:29092     --topic phone_event_raw
+
+
+## Interact with data
+
+Use the ksqldb cli:
+
+    docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
+
+
+  SELECT IEV_CUSTOMER_NAME, IEV_LONG, IEV_LAT, RCT_LONG, RCT_LAT FROM insurance_event_with_repair_info EMIT CHANGES LIMIT 2;
+  

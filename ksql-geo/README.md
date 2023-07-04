@@ -166,5 +166,16 @@ Use the ksqldb cli:
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
 
 
-  SELECT IEV_CUSTOMER_NAME, IEV_LONG, IEV_LAT, RCT_LONG, RCT_LAT FROM insurance_event_with_repair_info EMIT CHANGES LIMIT 2;
-  
+    SELECT IEV_CUSTOMER_NAME, IEV_LONG, IEV_LAT, RCT_LONG, RCT_LAT FROM insurance_event_with_repair_info EMIT CHANGES LIMIT 2;
+
+Create a stream with distance
+
+    CREATE STREAM customers_distance_repair_center AS SELECT iev_customer_name, iev_state, geo_distance(iev_lat, iev_long, rct_lat, rct_long, 'km') AS dist_to_repairer_km FROM insurance_event_with_repair_info;
+    
+Find al under 10 Km
+
+    select * from customers_distance_repair_center where DIST_TO_REPAIRER_KM < 11 emit changes;
+
+Find all over or equal 11 Km
+
+    select * from customers_distance_repair_center where DIST_TO_REPAIRER_KM >= 11 emit changes;

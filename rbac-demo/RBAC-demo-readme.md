@@ -82,7 +82,6 @@ Output with json
 
     confluent iam rbac role-binding list --principal User:alice --kafka-cluster $KAFKA_CLUSTER_ID -o json|jq
 
-
 ## Promote Alice to userAdmin role
 
     confluent iam rbac role-binding create --principal User:alice --role UserAdmin --kafka-cluster $KAFKA_CLUSTER_ID
@@ -90,6 +89,17 @@ Output with json
 Check again Alice role bindings (You can add -o json or yaml now to see the output):
 
     confluent iam rbac role-binding list --principal User:alice --kafka-cluster $KAFKA_CLUSTER_ID -o json|jq
+
+Logout cli:
+
+    confluent logout
+
+Login as contolcenter alice:
+
+    confluent login --url https://kafka1:8091
+
+    U: alice
+    P: alice-secret
 
 Try to create a topic with alcie:
 
@@ -173,6 +183,8 @@ Show Barnie in control center
     U: barnie
     P: barnie-secret
 
+Send message on topic notification in Control Center
+
 ## Test again with charlie
 
 Allow charlie to interact with API
@@ -219,6 +231,12 @@ In a non-interactive login,```CONFLUENT_PLATFORM_MDS_URL``` replaces the --url f
 Get all the user for a role:
 
     confluent iam rbac role-binding list  --role ResourceOwner   --kafka-cluster $KAFKA_CLUSTER_ID
+
+        confluent iam rbac role-binding list  --role ResourceOwner   --kafka-cluster $KAFKA_CLUSTER_ID -o json |jq
+
+Other Roles:
+
+    confluent iam rbac role-binding list  --role UserAdmin   --kafka-cluster $KAFKA_CLUSTER_ID -o json |jq
 
 # sample client.properties
 

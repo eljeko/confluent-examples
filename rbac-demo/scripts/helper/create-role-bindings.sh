@@ -117,6 +117,7 @@ do
         --kafka-cluster $KAFKA_CLUSTER_ID
 done
 
+: '
 ################################### Connectors ###################################
 echo "Creating role bindings for wikipedia-sse connector"
 
@@ -371,7 +372,7 @@ confluent iam rbac role-binding create \
     --role ResourceOwner \
     --resource Topic:${KSQLDB}ksql_processing_log \
     --kafka-cluster $KAFKA_CLUSTER_ID
-
+'
 ############################## Control Center ###############################
 echo "Creating role bindings for Control Center"
 

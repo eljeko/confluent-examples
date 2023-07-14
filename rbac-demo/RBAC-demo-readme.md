@@ -40,13 +40,9 @@ docker cp scripts/security/snakeoil-ca-1.crt tools:/snakeoil-ca-1.crt
 
 ## Login into tools container
 
-Enter tools container
+Enter tools container (see the guide on how to build the updated container in the folder ```tools```):
 
     docker exec -it tools bash
-
-Update the confluent cli:
-
-    curl --http1.1 -L https://cnfl.io/cli | sh -s -- -b /usr/bin v3.0.1
 
 Login into MDS
 
@@ -101,11 +97,15 @@ Login as contolcenter alice:
     U: alice
     P: alice-secret
 
-Try to create a topic with alcie:
+Try to create a topic with alice (should **fail**):
 
-    confluent kafka topic create notifications --partitions 2 --replication-factor 1 --url https://restproxy:8086
+    confluent kafka topic create notifications --partitions 2 --replication-factor 1 --url https://kafka1:8091/kafka/
 
-It fails
+Or
+
+    confluent kafka topic create notifications --partitions 2 --replication-factor 1 --url https://restproxy:8086    
+
+**It fails**
 
 **Logout alice from Control Center**
 
@@ -124,11 +124,22 @@ Login as contolcenter admin:
 
 Create new topic (through REST proxy)
 
+    confluent kafka topic create notifications --partitions 2 --replication-factor 1 --url https://kafka1:8091/kafka/
+
+Or
+
     confluent kafka topic create notifications --partitions 2 --replication-factor 1 --url https://restproxy:8086
+
+
+Then logout controlcenterAdmin user
+    
+    confluent logout
 
 # login in Control Center
 
 Login in control center with user:
+
+    confluent login --url https://kafka1:8091
 
     U: barnie
     P: barnie-secret
@@ -158,6 +169,10 @@ Login as Alice:
 
 Allow group to access ReST api:
 
+    confluent kafka acl create --allow --principal "User:barnie" --operation READ --consumer-group "*" --url https://kafka1:8091/kafka/
+
+Or
+
     confluent kafka acl create --allow --principal "User:barnie" --operation READ --consumer-group "*" --url https://restproxy:8086
 
 Assign to Barnie the role ResourceOwner on the new topic
@@ -170,26 +185,29 @@ Check the roles
 
     confluent iam rbac role-binding list --principal User:barnie --kafka-cluster $KAFKA_CLUSTER_ID -o json|jq
 
+Then logout alice user
+    
+    confluent logout
+
 ## Test again with correct roles for barnie
 
 Consume messages again with barnie:
 
     confluent kafka topic consume notifications --protocol SSL --bootstrap "kafka1:11091" --ca-location snakeoil-ca-1.crt --cert-location barnie.certificate.pem --key-location barnie.key
 
-Show Barnie in control center
-
-    confluent login --url https://kafka1:8091
+Login in Confluent Control http://localhost:9021/ as barnie:
 
     U: barnie
     P: barnie-secret
 
 Send message on topic notification in Control Center
 
+Then logout alice user
+    
+    confluent logout
+
+
 ## Test again with charlie
-
-Allow charlie to interact with API
-
-    confluent kafka acl create --allow --principal "User:charlie" --operation READ --consumer-group "*" --url https://restproxy:8086
 
 Consume messages with charlie:
 
@@ -197,7 +215,47 @@ Consume messages with charlie:
 
 Charlie can't access the topic
 
+### Allow charlie to access the topic without using ACL
 
+Login in Confluent Control http://localhost:9021/ center as:
+
+    U: controlcenterAdmin
+    P: controlcenterAdmin
+
+Login as Alice:
+
+    confluent login --url https://kafka1:8091
+
+    U: alice
+    P: alice-secret
+
+Allow for a specific group:
+
+    confluent iam rbac role-binding create --principal User:charlie --role DeveloperRead --resource Group:dev-01 --kafka-cluster $KAFKA_CLUSTER_ID
+
+Allow for topic:
+
+    confluent iam rbac role-binding create --principal User:charlie --role ResourceOwner --resource Topic:notifications --kafka-cluster $KAFKA_CLUSTER_ID
+
+
+Consume message with a specific group:
+
+    confluent kafka topic consume notifications --protocol SSL --bootstrap "kafka1:11091" --ca-location snakeoil-ca-1.crt --cert-location charlie.certificate.pem --key-location charlie.key --group dev-01
+
+# Acl
+
+
+List:
+
+    confluent kafka acl list  --url https://kafka1:8091/kafka/
+
+Delete:
+
+    confluent kafka acl delete --url https://kafka1:8091/kafka/ --allow --principal "User:charlie" --operation READ --consumer-group "*" --host "*"
+
+Exit session
+
+   confluent logout
 # Non interactive login
 
 Login can be accomplished non-interactively using the 
@@ -218,13 +276,17 @@ In a non-interactive login,```CONFLUENT_PLATFORM_MDS_URL``` replaces the --url f
 
     confluent logout
 
+Set the environment:
+
     export CONFLUENT_PLATFORM_USERNAME=alice
     export CONFLUENT_PLATFORM_PASSWORD=alice-secret
     export CONFLUENT_PLATFORM_MDS_URL=https://kafka1:8091
 
+Login:
+
     confluent login
 
-    export KAFKA_CLUSTER_ID=$(confluent cluster describe --url https://kafka1:8091 -o json |jq -r .scope[0].id) && echo $KAFKA_CLUSTER_ID
+Execute some commands:
 
     confluent iam rbac role-binding list --kafka-cluster $KAFKA_CLUSTER_ID  --principal User:barnie  --role ResourceOwner -o json|jq
 
@@ -232,20 +294,11 @@ Get all the user for a role:
 
     confluent iam rbac role-binding list  --role ResourceOwner   --kafka-cluster $KAFKA_CLUSTER_ID
 
-        confluent iam rbac role-binding list  --role ResourceOwner   --kafka-cluster $KAFKA_CLUSTER_ID -o json |jq
+    confluent iam rbac role-binding list  --role ResourceOwner   --kafka-cluster $KAFKA_CLUSTER_ID -o json |jq
 
 Other Roles:
 
     confluent iam rbac role-binding list  --role UserAdmin   --kafka-cluster $KAFKA_CLUSTER_ID -o json |jq
-
-# sample client.properties
-
-    sasl.mechanism = PLAIN
-    security.protocol = SASL_SSL
-    sasl.jaas.config = org.apache.kafka.common.security.plain.PlainLoginModule required username="barnie" password="barnie-secret";
-    ssl.truststore.location=/home/training/rbac/security/tls/kafka-client/kafka-client.truststore.jks
-    ssl.truststore.password=confluent
-
 
 # Customize demo
 

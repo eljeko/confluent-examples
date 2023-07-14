@@ -97,6 +97,7 @@ services:
     command: "bash -c 'if [ ! -f /etc/kafka/secrets/kafka.kafka1.keystore.jks ]; then echo \"ERROR: Did not find SSL certificates in /etc/kafka/secrets/ (did you remember to run ./scripts/start.sh instead of docker-compose up -d?)\" && exit 1 ; else /etc/confluent/docker/run ; fi'"
     ports:
       - 8091:8091
+#      - 8490:8490
       - 9091:9091
       - 10091:10091
       - 11091:11091
@@ -210,6 +211,7 @@ services:
       KAFKA_CONFLUENT_METADATA_SERVER_AUTHENTICATION_METHOD: BEARER
       KAFKA_CONFLUENT_METADATA_SERVER_LISTENERS: https://0.0.0.0:8091
       KAFKA_CONFLUENT_METADATA_SERVER_ADVERTISED_LISTENERS: https://kafka1:8091
+      #KAFKA_CONFLUENT_HTTP_SERVER_LISTENERS: https://0.0.0.0:8490
       KAFKA_CONFLUENT_METADATA_SERVER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.mds.truststore.jks
       KAFKA_CONFLUENT_METADATA_SERVER_SSL_TRUSTSTORE_PASSWORD: confluent
       KAFKA_CONFLUENT_METADATA_SERVER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.mds.keystore.jks

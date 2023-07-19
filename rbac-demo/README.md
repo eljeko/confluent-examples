@@ -36,6 +36,12 @@ If you need you can clean the demo filesystem setting the envrionment variable:
 
 This will regenerates certificates and strat all from scratch
 
+# Tutorials
+
+* [Main tutorial](RBAC-demo-readme.md)
+* [Group authorization tutorial](README-group_auth.md)
+* [RBAC API examples](README-Rest.md)
+
 # Note
 
 This demo is based on [Scripted Confluent Platform Demo](https://docs.confluent.io/platform/current/tutorials/cp-demo/docs/overview.html)

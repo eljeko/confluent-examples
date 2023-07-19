@@ -3,10 +3,10 @@
 
 The demo will use these users:
 
-controlcenterAdmin -> Cluster administrator
-alice -> will be promoted to roles administrator
-barnie -> will be given Resource owner to topic notifications
-charlie -> can't see antyhing
+* controlcenterAdmin -> Cluster administrator
+* alice -> will be promoted to roles administrator
+* barnie -> will be given Resource owner to topic notifications
+* charlie -> can't see antyhing
 
 # Control Center
 

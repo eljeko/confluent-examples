@@ -1,3 +1,4 @@
+# Group authorization tutorial
 ## OPTIONAL: This should be done during the execution of start.sh
  
 copy files in broker `kafka1` container

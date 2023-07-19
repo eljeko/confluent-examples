@@ -1,4 +1,4 @@
- # API intercat
+ # RBAC API example
 
 MDS API documentation [here](https://docs.confluent.io/platform/current/security/rbac/mds-api.html)
 

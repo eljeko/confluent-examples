@@ -75,7 +75,8 @@ services:
     volumes:
         - ./scripts/security/ldap_users:/container/service/slapd/assets/config/bootstrap/ldif/custom
     command: "--copy-service --loglevel debug"
-
+    ports:    
+      - 389:389
   kafka1:
     image: ${REPOSITORY}/cp-server:${CONFLUENT_DOCKER_TAG}
     hostname: kafka1

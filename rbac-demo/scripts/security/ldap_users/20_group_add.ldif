@@ -68,7 +68,7 @@ changetype: modify
 add: memberuid
 memberuid: cn=appSA,ou=users,{{ LDAP_BASE_DN }}
 
-dn: cn=KafkaDevelopers,ou=groups,{{ LDAP_BASE_DN }}
+dn: cn=KafkaOperations,ou=groups,{{ LDAP_BASE_DN }}
 changetype: modify
 add: memberuid
 memberuid: cn=badapp,ou=users,{{ LDAP_BASE_DN }}

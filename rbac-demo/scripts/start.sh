@@ -184,13 +184,23 @@ curl -u mds:mds -X POST "https://localhost:8091/security/1.0/rbac/principals" --
 # Do poststart_checks
 poststart_checks
 
-echo -e "\nCopy certificates into tools container"
+echo -e "\nCopy certificates into tools container:\n"
+
 docker cp security/barnie.key tools:/barnie.key
 docker cp security/barnie.certificate.pem tools:/barnie.certificate.pem
 docker cp security/charlie.key tools:/charlie.key
 docker cp security/charlie.certificate.pem tools:/charlie.certificate.pem
 docker cp security/snakeoil-ca-1.crt tools:/snakeoil-ca-1.crt
 
+echo -e "\nCopy certificates and properties into kafka1 container:\n"
+
+docker cp security/kafka.barnie.truststore.jks kafka1:/home/appuser/kafka.barnie.truststore.jks
+docker cp security/kafka.barnie.keystore.jks kafka1:/home/appuser/kafka.barnie.keystore.jks
+docker cp ../user-tests/barnie.properties kafka1:/home/appuser/barnie.properties
+
+docker cp security/kafka.badapp.truststore.jks kafka1:/home/appuser/kafka.badapp.truststore.jks
+docker cp security/kafka.badapp.keystore.jks kafka1:/home/appuser/kafka.badapp.keystore.jks
+docker cp ../user-tests/badapp.properties kafka1:/home/appuser/badapp.properties
 
 cat << EOF
 

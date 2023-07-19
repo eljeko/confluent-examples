@@ -8,7 +8,7 @@ givenName: BadApp
 cn: badapp
 displayName: BadApp Sheen
 uidNumber: 10019
-gidNumber: 5000
+gidNumber: 6000
 userPassword: badapp
 gecos: badapp
 loginShell: /bin/bash

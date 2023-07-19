@@ -24,6 +24,17 @@ This will prepare:
 * Creating role bindings for principals
 
 
+# To start
+
+cd script and run:
+
+    start.sh
+
+If you need you can clean the demo filesystem setting the envrionment variable:
+
+    CLEAN=true
+
+This will regenerates certificates and strat all from scratch
 
 # Note
 

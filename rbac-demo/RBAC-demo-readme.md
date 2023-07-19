@@ -26,7 +26,9 @@ Show that user can't see anything.
 
 # Setup RBAC for topic notifications
 
-## Prepare tools container with certificates
+## ## OPTIONAL: This should be done during the execution of start.sh
+
+Prepare tools container with certificates
 
 Before all copy the certificates into tools container
 
@@ -167,7 +169,7 @@ Login as Alice:
     U: alice
     P: alice-secret
 
-Allow group to access ReST api:
+Allow group to access:
 
     confluent kafka acl create --allow --principal "User:barnie" --operation READ --consumer-group "*" --url https://kafka1:8091/kafka/
 

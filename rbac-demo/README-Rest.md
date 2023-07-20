@@ -26,12 +26,6 @@ Get roles:
 
     curl https://kafka1:8091/security/1.0/roles -H "Accept: application/json" -H "Authorization: Bearer $TOKEN" | jq '.[].name'
 
-
-    curl -u alice:alice-secret https://kafka1:8091/security/1.0/roles
-
-    curl -u alice:alice-secret https://kafka1:8091/kafka/v3/clusters
-
-
 Some more complex interactions:
 
     export JSON_REQUEST $(echo '{\"clusterName\": \"$KAFKA_CLUSTER_ID\" }')&& echo $JSON_REQUEST 

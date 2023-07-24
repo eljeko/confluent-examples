@@ -53,12 +53,12 @@ Login into Keycloack with
 
 # Start Confluent Platform on Docker
 
+**NOTE**: before starting the Counfluent Platform Cluster and start connection test be sure to copy the client secret in the [client-oauth.properties](client-oauth.properties)
+
     cd scripts
     ./02_start-cp.sh
 
 Wait for CP to startup
-
-**NOTE**: before starting the connection test be sure to copy the client secret in the [client-oauth.properties](client-oauth.properties)
 
 # Test the oauth authorized config
 

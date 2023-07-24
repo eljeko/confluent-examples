@@ -57,31 +57,3 @@ This works because the user `barnie` belongs to the group KafkaDevelopers
 
 
 
-
-
-kafka-console-consumer  
---topic wikipedia.parsed \
-    --consumer-property group.id=listen-consumer \
-    --consumer-property security.protocol=SSL \
-    --consumer-property ssl.truststore.location=/etc/kafka/secrets/kafka.clientListen.truststore.jks \
-    --consumer-property ssl.truststore.password=confluent \
-    --consumer-property ssl.keystore.location=/etc/kafka/secrets/kafka.clientListen.keystore.jks \
-    --consumer-property ssl.keystore.password=confluent \
-    --consumer-property ssl.key.password=confluent \
-    --property basic.auth.credentials.source=USER_INFO \
-    --property basic.auth.user.info=clientListen:clientListen \  
-  
-  --consumer.config
-    --consumer-property group.id=listen-consumer \
-    --consumer-property security.protocol=SSL \
-    --consumer-property ssl.truststore.location=/etc/kafka/secrets/kafka.clientListen.truststore.jks \
-    --consumer-property ssl.truststore.password=confluent \
-    --consumer-property ssl.keystore.location=/etc/kafka/secrets/kafka.clientListen.keystore.jks \
-    --consumer-property ssl.keystore.password=confluent \
-    --consumer-property ssl.key.password=confluent \
-
-
-  Dopo aver creato le risorse:
-
-
-  confluent iam rbac role-binding create --principal Group:KafkaDevelopers --role ResourceOwner --resource Topic:notification --kafka-cluster $KAFKA_CLUSTER_ID

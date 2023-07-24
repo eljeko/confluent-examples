@@ -1,6 +1,6 @@
 # Oauth demo
 
-This example is copy of the original one  [by hifly81](https://github.com/hifly81/kafka-examples/tree/master/kafka-oauth-kip-768)
+This example is rework of the original one  [by hifly81](https://github.com/hifly81/kafka-examples/tree/master/kafka-oauth-kip-768)
 
 # Start the idp
 

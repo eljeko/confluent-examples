@@ -45,7 +45,7 @@ Query the stram on a WINDOW size:
     GROUP BY 1
     EMIT FINAL;
 
-You can create Create a materialized view
+You can create a materialized view
 
     CREATE TABLE orders_statistics as
     SELECT 'orders' as O  , TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:ss','Europe/London')
@@ -58,7 +58,7 @@ You can create Create a materialized view
 
 # Query the table and consume messages
 
-Query the Table from CLI (remember to start first the data generator with jr):
+Query the Table from CLI (remember to start first the data generation with [jr](https://jrnd.io/)):
     
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088 -e "SELECT DATE, MSG_COUNT  FROM orders_statistics EMIT CHANGES;"
 

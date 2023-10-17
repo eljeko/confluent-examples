@@ -6,6 +6,14 @@ This example shows how to count messages on a topic in an interval of time.
 
     ./start-cluster.sh
 
+# Fast setup (skip if you want do the tutorial step by step)
+
+You can run the command:
+
+    ./setup-demo.sh
+
+This will prepare everything or follow the next steps.
+
 # Create the topic orders
 
     docker exec -i broker kafka-topics --bootstrap-server broker:9092 --topic orders --create --partitions 3 --replication-factor 1
@@ -16,7 +24,7 @@ Leave jr running:
 
     docker exec -i jr-cli jr run -l -n1 -f 1000ms shoe_order|docker exec -i broker kafka-console-producer --bootstrap-server broker:9092 --topic orders
 
-You can change the values for -n1 -f 1000ms
+You can change the values for -n1 -f 1000ms:
 
     -n int              Number of elements to create for each pass (default 1)
     -f duration         how much time to wait for next generation pass (default -1ns)
@@ -48,13 +56,7 @@ You can create Create a materialized view
     GROUP BY 'orders'
     EMIT FINAL;
 
-# Fast setup
-
-You can run the command:
-
-    ./setup-demo.sh
-
-This will prepare everything for you.
+# Query the table and consume messages
 
 Query the Table from CLI (remember to start first the data generator with jr):
     

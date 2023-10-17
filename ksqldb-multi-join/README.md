@@ -3,7 +3,7 @@
 
 This is a diagram of the ksql flow:
 
-![Join diagram](diagram.png "Title")
+![Join diagram](ksql-stream.png "Title")
 
 This example shows how to join the content of theee topics and emit a message only once on each topic a message with the same car plate arrives
 

@@ -41,51 +41,13 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:9092'
 
-  connect:
-    image: confluentinc/cp-kafka-connect-base:${CONFLUENT_VERSION}
-    hostname: connect
-    container_name: connect
-    depends_on:
-      - schema-registry
-    ports:
-      - "8083:8083"
-    environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'broker:9092'
-      CONNECT_REST_ADVERTISED_HOST_NAME: connect
-      CONNECT_REST_PORT: 8083
-      CONNECT_GROUP_ID: compose-connect-group
-      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
-      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
-      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
-      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
-    command:
-      - bash
-      - -c
-      - |
-        echo "Installing Connector"
-        confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.6.4
-        #
-        echo "Launching Kafka Connect worker"
-        /etc/confluent/docker/run &
-        #
-        sleep infinity
-
   ksqldb-server:
     image: confluentinc/ksqldb-server:${KSQL_VERSION}
     hostname: ksqldb-server
     container_name: ksqldb-server
     depends_on:
       - broker
-      - schema-registry
-      - connect
+      - schema-registry  
     ports:
       - "8088:8088"
     environment:
@@ -100,6 +62,7 @@ services:
       KSQL_KSQL_STREAMS_AUTO_OFFSET_RESET: "earliest"
       KSQL_KSQL_STREAMS_CACHE_MAX_BYTES_BUFFERING: "20000000"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
+
   control-center:
     image: confluentinc/cp-enterprise-control-center:${CONFLUENT_VERSION}
     hostname: control-center
@@ -107,7 +70,6 @@ services:
     depends_on:
       - broker
       - schema-registry
-      - connect
       - ksqldb-server
     ports:
       - "9021:9021"
@@ -122,9 +84,13 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
+
   ksqldb-cli:
     image: confluentinc/ksqldb-cli:${KSQL_VERSION}
     container_name: ksqldb-cli
+    environment:
+      # workaround for WARNINIG errors on console in docker: sun.rmi.transport.tcp.TCPTransport$AcceptLoop run WARNING: RMI TCP Accept-0: accept loop for ServerSocket [...]
+      KSQL_LOG4J_OPTS: "-Djava.util.logging.config.file=/home/appuser/logging.properties"    
     depends_on:
       - broker
       - ksqldb-server
@@ -133,34 +99,5 @@ services:
     volumes:       
       # copy the sql script to create ksql entities
       - ./ksql-setup.sql:/home/appuser/ksql-setup.sql   
-
-  rest-proxy:
-    image: confluentinc/cp-kafka-rest:${CONFLUENT_VERSION}
-    depends_on:
-      - broker
-      - schema-registry
-    ports:
-      - "8082:8082"
-    hostname: rest-proxy
-    container_name: rest-proxy
-    environment:
-      KAFKA_REST_HOST_NAME: rest-proxy
-      KAFKA_REST_BOOTSTRAP_SERVERS: broker:9092
-      KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
-      KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
-
-  kcat:
-    #image: cnfldemos/tools:0.3
-    image: confluentinc/cp-kcat:latest
-    hostname: kcat
-    container_name: kcat
-    entrypoint: /bin/bash
-    tty: true
-    
-  jr-cli:
-    image: ugol/jr
-    container_name: jr-cli
-    entrypoint: /bin/sh
-    tty: true
-    volumes:
-        - ./templates/event_template.tpl:/home/jr/.jr/templates/event_template.tpl    
+      - ./ksql-plates.sql:/home/appuser/ksql-plates.sql   
+      - ./logging.properties:/home/appuser/logging.properties

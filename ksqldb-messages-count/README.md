@@ -1,4 +1,8 @@
-# start docker-compose
+# Count messages with KSQL
+
+This example shows how to count messages on a topic in an interval of time.
+
+# Start docker-compose
 
     ./start-cluster.sh
 
@@ -6,7 +10,9 @@
 
     docker exec -i broker kafka-topics --bootstrap-server broker:9092 --topic orders --create --partitions 3 --replication-factor 1
 
-# Generate some data with [jr](https://jrnd.io/)
+# Generate data with [jr](https://jrnd.io/)
+
+Leave jr running:
 
     docker exec -i jr-cli jr run -l -n1 -f 1000ms shoe_order|docker exec -i broker kafka-console-producer --bootstrap-server broker:9092 --topic orders
 

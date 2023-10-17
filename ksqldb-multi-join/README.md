@@ -75,4 +75,4 @@ Insert one or more of these entries int the ```plates_car_output``` stream::
 
 # Check the output
 
-You should receive an output join message on topic PLATES_NOTIFICATIONS once each topic had received at least a messages.
+You should receive an output join message on topic PLATES_NOTIFICATIONS once each topic has received at least a messages.

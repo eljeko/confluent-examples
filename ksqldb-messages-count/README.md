@@ -35,7 +35,7 @@ Create the stream on the topic:
 
     CREATE STREAM orders (order_id VARCHAR, ts VARCHAR) WITH (KAFKA_TOPIC ='orders', VALUE_FORMAT='JSON');
 
-Query the stram on a WINDOW size:
+Query the stream on a WINDOW size:
 
     SELECT TIMESTAMPTOSTRING(WINDOWSTART,'yyyy-MM-dd HH:mm:ss','Europe/London')
         AS DATE,

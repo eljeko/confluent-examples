@@ -37,6 +37,7 @@ AWS-CFLT
 
 terraform-apply.sh
 terraform-plan.sh
+terraform-destroy.sh
 api-key*
 
 # Local .terraform directories

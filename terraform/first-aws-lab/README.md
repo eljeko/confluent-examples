@@ -8,7 +8,7 @@ Check the final output
     
     terraform output
 
-Synch local stae with remote
+Synch local state with remote
 
     terraform refresh
 

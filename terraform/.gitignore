@@ -34,6 +34,11 @@ ccloud/beginner-cloud/.ignored_folder/*
 ccloud-observability/target/*
 ccloud-observability/.env
 AWS-CFLT
+
+terraform-apply.sh
+terraform-plan.sh
+api-key*
+
 # Local .terraform directories
 **/.terraform/*
 

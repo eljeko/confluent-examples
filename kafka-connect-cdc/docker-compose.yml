@@ -71,6 +71,7 @@ services:
         confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:${JDBC_CONNECTOR_VERSION}
         confluent-hub install --no-prompt debezium/debezium-connector-postgresql:${POSTEGRES_CONNECTOR_VERSION}
         confluent-hub install --no-prompt debezium/debezium-connector-sqlserver:${SQLSERVER_CONNECTOR_VERSION}
+        confluent-hub install --no-prompt mongodb/kafka-connect-mongodb:${MONGODB_CONNECTOR_VERSION}
         #
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run &
@@ -135,6 +136,10 @@ services:
         CONFLUENT_METRICS_TOPIC_REPLICATION: 1
         PORT: 9021
 
+###############################
+# Databases and Mongo Section #
+############################### 
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: mssql-readings-source
@@ -164,3 +169,20 @@ services:
         done
         # So that the container doesn't shut down, sleep this thread
         sleep infinity
+ 
+  mongodb_container:
+    platform: linux/arm64
+    container_name: mongodb
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_DATABASE: readings
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+      - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+volumes:
+  mongodb_data_container:          

@@ -79,7 +79,7 @@ services:
         sleep infinity
 
   ksqldb-server:
-    image: confluentinc/ksqldb-server:${KSQL_VERSION}
+    image: confluentinc/cp-ksqldb-server:${KSQL_VERSION}
     hostname: ksqldb-server
     container_name: ksqldb-server
     depends_on:
@@ -104,13 +104,19 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
 
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:${KSQL_VERSION}
+    image: confluentinc/cp-ksqldb-cli:${KSQL_VERSION}
     container_name: ksqldb-cli
+    environment:
+      # workaround for WARNINIG errors on console in docker: sun.rmi.transport.tcp.TCPTransport$AcceptLoop run WARNING: RMI TCP Accept-0: accept loop for ServerSocket [...]
+      KSQL_LOG4J_OPTS: "-Djava.util.logging.config.file=/home/appuser/logging.properties"
     depends_on:
       - broker
       - ksqldb-server
     entrypoint: /bin/sh
     tty: true
+    volumes:       
+      # workaround for WARNING on log
+      - ./logging.properties:/home/appuser/logging.properties
 
   control-center:
       image: confluentinc/cp-enterprise-control-center:${CONFLUENT_VERSION}
@@ -142,7 +148,7 @@ services:
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: mssql-readings-source
+    container_name: mssql-crm
     ports:
      - 1433:1433
     environment:
@@ -177,12 +183,40 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
-      MONGO_INITDB_DATABASE: readings
+      MONGO_INITDB_DATABASE: ordersdb
     ports:
       - 27017:27017
     volumes:
       - mongodb_data_container:/data/db
       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  postgres:
+    container_name: pg-products
+    image: quay.io/debezium/postgres:9.6
+    ports:
+     - "5432:5432"
+    environment:
+     - POSTGRES_USER=postgresuser
+     - POSTGRES_PASSWORD=postgrespw
+     - POSTGRES_DB=central_store
+    volumes: 
+    #- ./postgres-data:/var/lib/postgresql/data
+    # copy the sql script to create tables
+     - ./sql/pg-init.sql:/docker-entrypoint-initdb.d/init.sql      
+
+###############################
+# Datagen  JR container       #
+############################### 
+
+  jr-cli:
+      image: ugol/jr
+      container_name: jr-cli
+      entrypoint: /bin/sh
+      tty: true
+      volumes:
+          - ./templates/event_template.tpl:/home/jr/.jr/templates/event_template.tpl
+          - ./templates/insert_orders.tpl:/home/jr/.jr/templates/insert_orders.tpl
+
 
 volumes:
   mongodb_data_container:          

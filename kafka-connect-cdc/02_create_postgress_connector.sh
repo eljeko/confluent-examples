@@ -1,19 +1,16 @@
     curl -i -X PUT -H  "Content-Type:application/json" \
-        http://localhost:8083/connectors/mssqlcrmcdc/config \
+        http://localhost:8083/connectors/pgproductscdc/config \
         -d '{
-            "connector.class": "io.debezium.connector.sqlserver.SqlServerConnector",
+            "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
             "tasks.max": "1",
-            "initial.database": "crm",
-            "database.names": "crm",
-            "database.user": "sa",
-            "database.password": "MSQLserver10!",
-            "server.name": "sensor",
-            "database.hostname": "mssql-crm",
-            "server.port": "1433",        
-            "topic.prefix": "mssql",
-            "name": "mssqlcrmcdc",            
-            "table.include.list": "dbo.Customers,dbo.Orders",
-            "database.trustServerCertificate": "true",
+            "snapshot.mode": "always",
+            "database.dbname": "central_store",
+            "database.user": "postgresuser",
+            "database.password": "postgrespw",            
+            "database.hostname": "pg-products",
+            "database.port": "5432",        
+            "topic.prefix": "pg",
+            "name": "pgproductscdc",                    
             "include.schema.changes": "false",
             "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
             "transforms": "extractKey, unwrap",
@@ -27,3 +24,6 @@
             "schema.history.internal.kafka.topic": "history_internal_topic",
             "schema.history.internal.kafka.bootstrap.servers": "broker:9092"
         }'
+
+
+#   "table.include.list": "dbo.Customers,dbo.Orders",

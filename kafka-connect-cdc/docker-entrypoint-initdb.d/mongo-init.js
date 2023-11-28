@@ -1,3 +1,3 @@
-db = db.getSiblingDB('readings_db');
+db = db.getSiblingDB('ordersdb');
 
-db.createCollection('readings');
+db.createCollection('orders');

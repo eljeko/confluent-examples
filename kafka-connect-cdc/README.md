@@ -64,7 +64,7 @@ Wait for database to start and init with the sql script provided in docker-compo
 The output should be:
 
 ```
-id          name            surname         address         zip_code   city            country         nickname
+id          name            surname         address         zip_code   city            country         username
 ----------- --------------- --------------- --------------- ---------- --------------- --------------- ---------------
           1 Jack            Turner          South Boulevard 37219      Indianapolis    New York        j.turner
           2 Maria           Reyes           Highland Drive  66603      Los Angeles     Texas           m_reyes
@@ -77,7 +77,7 @@ id          name            surname         address         zip_code   city     
           9 Debra           Wilson          Cherry Lane 4   70802      Miami           Nevada          debra_w         
 ```
 
-## Query Postgress
+## Query Postgress
 
     docker exec pg-products psql -U postgresuser -d central_store -c 'SELECT  * FROM products limit 10'
 
@@ -268,7 +268,7 @@ CREATE TABLE customers (
     zip_code string,
     city string, 
     country string, 
-    nickname string 
+    username string 
 ) WITH (
     KAFKA_TOPIC = 'mssql.crm.dbo.Customers', 
     VALUE_FORMAT='AVRO', 
@@ -306,7 +306,7 @@ Create the ```customers``` - ```orders``` join stream:
 ```sql   
 CREATE stream CUSTOMERS_ORDERS as
     SELECT orders.id AS orderid, 
-        nickname, 
+        username, 
         name, 
         surname, 
         quantity, 
@@ -351,7 +351,7 @@ Create the join stream:
 CREATE stream CUSTOMERS_ORDERS_COMPLETE as
     SELECT 
         orderid, 
-        nickname, 
+        username, 
         CUSTOMERS_ORDERS.name as name, 
         surname, 
         quantity, 

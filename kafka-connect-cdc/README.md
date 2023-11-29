@@ -279,7 +279,7 @@ CREATE TABLE customers (
 Test if the ```Customers``` Table contains data:
 
 ```sql   
-    SELECT * FROM customers EMIT CHANGES;
+SELECT * FROM customers EMIT CHANGES;
 ```
 Create the stream ```orders``` from topic ```mssql.crm.dbo.Orders```:
 
@@ -343,6 +343,10 @@ Test if the ```Products``` table contains data:
 ```sql
 SELECT * FROM products EMIT CHANGES;
 ```
+At the end of this step you have this *Streaming Pipeline*
+
+![CRM Streaming Pipeline](images/01_ksql.png)
+
 ## Join the data from SQL server and Postgress
 
 Create the join stream:
@@ -366,20 +370,29 @@ CREATE stream CUSTOMERS_ORDERS_COMPLETE as
 Test the ```CUSTOMERS_ORDERS_COMPLETE``` stream:
 
 ```sql   
-    SELECT * FROM CUSTOMERS_ORDERS_COMPLETE EMIT CHANGES;
+SELECT * FROM CUSTOMERS_ORDERS_COMPLETE EMIT CHANGES;
 ```
 
+At the end of this step you have the complete *Streaming Pipeline*
+
+![CRM Streaming Pipeline](images/02_ksql.png)
+
+
 # Test the end to end streaming pipeline
+
+Now check that mongodb contains the documents:
+
+    docker exec -i mongodb mongosh --eval 'db.orders.find();' ordersdb --username root --password rootpassword --authenticationDatabase admin
+
 
 Now let's keep generating orders
 
     docker exec -i jr-cli jr run -f 1000ms -l insert_orders|xargs -I{} docker exec  mssql-crm /opt/mssql-tools/bin/sqlcmd -U sa -P MSQLserver10! -Q "{}" -d crm
 
-Check ksql output Topic:
+And count documents in mongodb while we are inserting new orders:
+    
+    docker exec -i mongodb mongosh --eval 'db.orders.countDocuments();' ordersdb --username root --password rootpassword --authenticationDatabase admin
 
-    [TBD]
+Or just count documents in a shell while loop:
 
-
-    docker exec -i mongodb mongosh --eval 'db.orders.find();' ordersdb --username root --password rootpassword
-
-    mongosh --eval 'db.orders.find();' ordersdb --username root --password rootpassword --host mongodb --port 27017
+    while (true);do docker exec -i mongodb mongosh --eval 'db.orders.countDocuments();' ordersdb --username root --password rootpassword --authenticationDatabase admin|tail -n 1;sleep 3;done

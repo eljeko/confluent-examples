@@ -24,6 +24,3 @@
             "schema.history.internal.kafka.topic": "history_internal_topic",
             "schema.history.internal.kafka.bootstrap.servers": "broker:9092"
         }'
-
-
-#   "table.include.list": "dbo.Customers,dbo.Orders",

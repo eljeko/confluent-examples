@@ -105,203 +105,273 @@ The output should be:
 Run this command:
 
 ```
-    curl -i -X PUT -H  "Content-Type:application/json" \
-        http://localhost:8083/connectors/mssqlcrmcdc/config \
-        -d '{
-            "connector.class": "io.debezium.connector.sqlserver.SqlServerConnector",
-            "tasks.max": "1",
-            "initial.database": "crm",
-            "database.names": "crm",
-            "database.user": "sa",
-            "database.password": "MSQLserver10!",
-            "server.name": "sensor",
-            "database.hostname": "mssql-crm",
-            "server.port": "1433",        
-            "topic.prefix": "mssql",
-            "name": "mssqlcrmcdc",
-            "transforms": "unwrap",
-            "table.include.list": "dbo.Customers,dbo.Orders",
-            "database.trustServerCertificate": "true",
-            "include.schema.changes": "false",
-            "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
-            "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-            "key.converter.schemas.enable": "false",
-            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-            "value.converter.schemas.enable": "false",
-            "schema.history.internal.kafka.topic": "history_internal_topic",
-            "schema.history.internal.kafka.bootstrap.servers": "broker:9092"
-        }'
+curl -i -X PUT -H  "Content-Type:application/json" \
+    http://localhost:8083/connectors/mssqlcrmcdc/config \
+    -d '{
+        "connector.class": "io.debezium.connector.sqlserver.SqlServerConnector",
+        "tasks.max": "1",
+        "initial.database": "crm",
+        "database.names": "crm",
+        "database.user": "sa",
+        "database.password": "MSQLserver10!",
+        "server.name": "sensor",
+        "database.hostname": "mssql-crm",
+        "server.port": "1433",        
+        "topic.prefix": "mssql",
+        "name": "mssqlcrmcdc",            
+        "table.include.list": "dbo.Customers,dbo.Orders",
+        "database.trustServerCertificate": "true",
+        "include.schema.changes": "false",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms": "extractKey, unwrap",
+        "transforms.extractKey.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+        "transforms.extractKey.field": "id",
+        "key.converter": "org.apache.kafka.connect.converters.IntegerConverter",
+        "key.converter.schemas.enable": "false",    
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter.schemas.enable": "true",
+        "value.converter.schema.registry.url": "http://schema-registry:8081",
+        "schema.history.internal.kafka.topic": "history_internal_topic",
+        "schema.history.internal.kafka.bootstrap.servers": "broker:9092"
+    }'
 ```
 
 You should get an output similar to this one:
 
 ```
-    HTTP/1.1 201 Created
-    Date: Tue, 28 Nov 2023 14:18:35 GMT
-    Location: http://localhost:8083/connectors/mssqlcrmcdc
-    Content-Type: application/json
-    Content-Length: 929
-    Server: Jetty(9.4.51.v20230217)
+HTTP/1.1 201 Created
+Date: Tue, 28 Nov 2023 14:18:35 GMT
+Location: http://localhost:8083/connectors/mssqlcrmcdc
+Content-Type: application/json
+Content-Length: 929
+Server: Jetty(9.4.51.v20230217)
 
-    {"name":"mssqlcrmcdc","config":{"connector.class":"io.debezium.connector.sqlserver.SqlServerConnector","tasks.max":"1","initial.database":"crm","database.names":"crm","database.user":"sa","database.password":"MSQLserver10!","server.name":"sensor","database.hostname":"mssql-crm","server.port":"1433","topic.prefix":"mssql","name":"mssqlcrmcdc","transforms":"unwrap","table.include.list":"dbo.Customers,dbo.Orders","database.trustServerCertificate":"true","include.schema.changes":"false","transforms.unwrap.type":"io.debezium.transforms.ExtractNewRecordState","key.converter":"org.apache.kafka.connect.json.JsonConverter","key.converter.schemas.enable":"false","value.converter":"org.apache.kafka.connect.json.JsonConverter","value.converter.schemas.enable":"false","schema.history.internal.kafka.topic":"history_internal_topic","schema.history.internal.kafka.bootstrap.servers":"broker:9092"},"tasks":[],"type":"source"}
+{"name":"mssqlcrmcdc","config":{"connector.class":"io.debezium.connector.sqlserver.SqlServerConnector","tasks.max":"1","initial.database":"crm","database.names":"crm","database.user":"sa","database.password":"MSQLserver10!","server.name":"sensor","database.hostname":"mssql-crm","server.port":"1433","topic.prefix":"mssql","name":"mssqlcrmcdc","transforms":"unwrap","table.include.list":"dbo.Customers,dbo.Orders","database.trustServerCertificate":"true","include.schema.changes":"false","transforms.unwrap.type":"io.debezium.transforms.ExtractNewRecordState","key.converter":"org.apache.kafka.connect.json.JsonConverter","key.converter.schemas.enable":"false","value.converter":"org.apache.kafka.connect.json.JsonConverter","value.converter.schemas.enable":"false","schema.history.internal.kafka.topic":"history_internal_topic","schema.history.internal.kafka.bootstrap.servers":"broker:9092"},"tasks":[],"type":"source"}
 ```
 
-Check the congiruation:
+You can check the configuration with this command:
 
     curl -X GET -H  "Content-Type:application/json" http://localhost:8083/connectors/mssqlcrmcdc/config|jq
 
-You should get:
-
-```
-    {
-    "connector.class": "io.debezium.connector.sqlserver.SqlServerConnector",
-    "initial.database": "factory",
-    "database.user": "sa",
-    "database.names": "factory",
-    "server.name": "sensor",
-    "tasks.max": "1",
-    "transforms": "unwrap",
-    "schema.history.internal.kafka.bootstrap.servers": "broker:9092",
-    "include.schema.changes": "false",
-    "key.converter.schemas.enable": "false",
-    "topic.prefix": "mssql",
-    "schema.history.internal.kafka.topic": "history_internal_topic",
-    "database.hostname": "mssql-readings-source",
-    "database.password": "MSQLserver10!",
-    "server.port": "1433",
-    "name": "mssqlsensorscdc",
-    "value.converter.schemas.enable": "false",
-    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
-    "table.include.list": "dbo.sensors_readings",
-    "database.trustServerCertificate": "true",
-    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "key.converter": "org.apache.kafka.connect.json.JsonConverter"
-    }
-```
-
-Check that the initial events arrived:
+Check that the initial load of events from sqlserver:
 
     docker exec -it schema-registry /usr/bin/kafka-avro-console-consumer --topic mssql.crm.dbo.Customers  --bootstrap-server broker:9092 --property print.key=true --property key.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer --from-beginning
 
-Now let's insert some orders:
+Now we insert a batch of *orders*:
 
     docker exec -i jr-cli jr run -n 10 -l insert_orders|xargs -I{} docker exec  mssql-crm /opt/mssql-tools/bin/sqlcmd -U sa -P MSQLserver10! -Q "{}" -d crm
     
 
 ## Instantiate Postgress connector
 
-
-
-## Instantiate MongoDB connector
+Run this command:
 
 ```
-    curl -i -X PUT -H  "Content-Type:application/json" \
-        http://localhost:8083/connectors/mongocdcsink/config \
-        -d '{
-            "name": "mongocdcsink",
-            "connector.class": "com.mongodb.kafka.connect.MongoSinkConnector",
-            "topics": "mssql.factory.dbo.sensors_readings",
-            "connection.uri": "mongodb://root:rootpassword@mongodb",
-            "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-            "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-            "value.converter.schemas.enable": "false",
-            "database": "readings_db",
-            "collection": "readings"         
-        }'
+curl -i -X PUT -H  "Content-Type:application/json" \
+    http://localhost:8083/connectors/pgproductscdc/config \
+    -d '{
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+        "tasks.max": "1",
+        "snapshot.mode": "always",
+        "database.dbname": "central_store",
+        "database.user": "postgresuser",
+        "database.password": "postgrespw",            
+        "database.hostname": "pg-products",
+        "database.port": "5432",        
+        "topic.prefix": "pg",
+        "name": "pgproductscdc",                    
+        "include.schema.changes": "false",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms": "extractKey, unwrap",
+        "transforms.extractKey.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+        "transforms.extractKey.field": "id",
+        "key.converter": "org.apache.kafka.connect.converters.IntegerConverter",
+        "key.converter.schemas.enable": "false",    
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter.schemas.enable": "true",
+        "value.converter.schema.registry.url": "http://schema-registry:8081",
+        "schema.history.internal.kafka.topic": "history_internal_topic",
+        "schema.history.internal.kafka.bootstrap.servers": "broker:9092"
+    }'
 ```
 
 You should get an output similar to this one:
 
 ```
-    HTTP/1.1 201 Created
-    Date: Mon, 27 Nov 2023 15:24:58 GMT
-    Location: http://localhost:8083/connectors/mongocdcsink
-    Content-Type: application/json
-    Content-Length: 468
-    Server: Jetty(9.4.51.v20230217)
+HTTP/1.1 201 Created
+Date: Tue, 28 Nov 2023 19:50:10 GMT
+Location: http://localhost:8083/connectors/pgproductscdc
+Content-Type: application/json
+Content-Length: 1035
+Server: Jetty(9.4.51.v20230217)
 
-    {"name":"mongocdcsink","config":{"name":"mongocdcsink","connector.class":"com.mongodb.kafka.connect.MongoSinkConnector","topics":"mssql.factory.dbo.sensors_readings","connection.uri":"mongodb://root:rootpassword@mongodb","key.converter":"org.apache.kafka.connect.storage.StringConverter","value.converter":"org.apache.kafka.connect.json.JsonConverter","value.converter.schemas.enable":"false","database":"readings_db","collection":"readings"},"tasks":[],"type":"sink"}
+{"name":"pgproductscdc","config":{"connector.class":"io.debezium.connector.postgresql.PostgresConnector","tasks.max":"1","snapshot.mode":"always","database.dbname":"central_store","database.user":"postgresuser","database.password":"postgrespw","database.hostname":"pg-products","database.port":"5432","topic.prefix":"pg","name":"pgproductscdc","include.schema.changes":"false","transforms.unwrap.type":"io.debezium.transforms.ExtractNewRecordState","transforms":"extractKey, unwrap","transforms.extractKey.type":"org.apache.kafka.connect.transforms.ExtractField$Key","transforms.extractKey.field":"id","key.converter":"org.apache.kafka.connect.converters.IntegerConverter","key.converter.schemas.enable":"false","value.converter":"io.confluent.connect.avro.AvroConverter","value.converter.schemas.enable":"true","value.converter.schema.registry.url":"http://schema-registry:8081","schema.history.internal.kafka.topic":"history_internal_topic","schema.history.internal.kafka.bootstrap.servers":"broker:9092"},"tasks":[],"type":"source"}
 ```
 
-Check the congiruation:
+## Instantiate MongoDB connector
+
+Run this command:
+
+```
+curl -i -X PUT -H  "Content-Type:application/json" \
+    http://localhost:8083/connectors/mongocdcsink/config \
+    -d '{
+        "name": "mongocdcsink",
+        "connector.class": "com.mongodb.kafka.connect.MongoSinkConnector",
+        "topics": "mssql.factory.dbo.sensors_readings",
+        "connection.uri": "mongodb://root:rootpassword@mongodb",
+        "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter.schemas.enable": "false",
+        "database": "readings_db",
+        "collection": "readings"         
+    }'
+```
+
+You should get an output similar to this one:
+
+```
+HTTP/1.1 201 Created
+Date: Mon, 27 Nov 2023 15:24:58 GMT
+Location: http://localhost:8083/connectors/mongocdcsink
+Content-Type: application/json
+Content-Length: 468
+Server: Jetty(9.4.51.v20230217)
+
+{"name":"mongocdcsink","config":{"name":"mongocdcsink","connector.class":"com.mongodb.kafka.connect.MongoSinkConnector","topics":"mssql.factory.dbo.sensors_readings","connection.uri":"mongodb://root:rootpassword@mongodb","key.converter":"org.apache.kafka.connect.storage.StringConverter","value.converter":"org.apache.kafka.connect.json.JsonConverter","value.converter.schemas.enable":"false","database":"readings_db","collection":"readings"},"tasks":[],"type":"sink"}
+```
+
+You can check the configuration with this command:
 
     curl -X GET -H  "Content-Type:application/json" http://localhost:8083/connectors/mongocdcsink/config|jq
 
-You should get:
-
-```
-    {
-    "connector.class": "com.mongodb.kafka.connect.MongoSinkConnector",
-    "database": "readings_db",
-    "topics": "mssql.factory.dbo.sensors_readings",
-    "name": "mongocdcsink",
-    "connection.uri": "mongodb://root:rootpassword@mongodb",
-    "value.converter.schemas.enable": "false",
-    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "collection": "readings",
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
-    }
-```
-
-
 # Ksql setup
+
+Now we create the ksql items we need to merge the information from two different databases and 
+
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088 
-    
-    SET 'auto.offset.reset' = 'earliest';
+
+```sql   
+SET 'auto.offset.reset' = 'earliest';
+```
 
 ## Create the table and stream from sqlserver
 
-We create a Table from customers:
+Create ```Customers``` Table from topic ```mssql.crm.dbo.Customers```:
 
-    CREATE TABLE customers (id INT PRIMARY KEY, name string, surname string, address string,zip_code string,city string, country string, nickname string ) WITH (KAFKA_TOPIC = 'mssql.crm.dbo.Customers', VALUE_FORMAT='AVRO', KEY_FORMAT='KAFKA');    
+```sql
+CREATE TABLE customers (
+    id INT PRIMARY KEY, 
+    name string, 
+    surname string, 
+    address string,
+    zip_code string,
+    city string, 
+    country string, 
+    nickname string 
+) WITH (
+    KAFKA_TOPIC = 'mssql.crm.dbo.Customers', 
+    VALUE_FORMAT='AVRO', 
+    KEY_FORMAT='KAFKA'
+);    
+```
 
-Test if the table containes data:
+Test if the ```Customers``` Table contains data:
 
+```sql   
     SELECT * FROM customers EMIT CHANGES;
+```
+Create the stream ```orders``` from topic ```mssql.crm.dbo.Orders```:
 
-We create the stream orders
+```sql
+CREATE STREAM orders (
+    id INT KEY, 
+    itemid int, 
+    quantity int, 
+    customerid int 
+) WITH (
+    kafka_topic='mssql.crm.dbo.Orders',
+    value_format='AVRO', 
+    KEY_FORMAT='KAFKA'
+);
+```
 
-   CREATE STREAM  orders (id INT KEY, itemid int, quantity int, customerid int ) WITH (kafka_topic='mssql.crm.dbo.Orders', value_format='AVRO', KEY_FORMAT='KAFKA');
+Test the ```orders``` stream:
 
-Test the stream:
+```sql   
+SELECT * FROM  ORDERS EMIT CHANGES;
+```
+Create the ```customers``` - ```orders``` join stream:
 
-    SELECT * FROM  ORDERS EMIT CHANGES;
+```sql   
+CREATE stream CUSTOMERS_ORDERS as
+    SELECT orders.id AS orderid, 
+        nickname, 
+        name, 
+        surname, 
+        quantity, 
+        customerid
+    FROM orders
+    LEFT JOIN customers ON orders.customerid = customers.id;
+```
 
-Create the Customers - Orders join stream
+Test the ```customers``` - ```orders``` stream:
 
-    CREATE stream CUSTOMERS_ORDERS as
-        SELECT orders.id AS orderid, nickname, name, surname, quantity, customerid
-            FROM orders
-            LEFT JOIN customers ON orders.customerid = customers.id;
+```sql
+SELECT * FROM  CUSTOMERS_ORDERS EMIT CHANGES;
+```
 
+## Create the Table and Stream from Postgress
 
-   SELECT * FROM  CUSTOMERS_ORDERS EMIT CHANGES;
+We create ```Products``` Table from topic ```pg.public.products```:
 
+```sql
+CREATE TABLE products (
+    id INT PRIMARY KEY, 
+    name string,
+    brand string,
+    price INT
+) WITH (
+    KAFKA_TOPIC = 'pg.public.products', 
+    VALUE_FORMAT='AVRO', 
+    KEY_FORMAT='KAFKA'
+);    
+```
 
-## Create the table and stream from Postgress
+Test if the ```Products``` table contains data:
 
-We create a Table from products:
-
-    CREATE TABLE products (id INT PRIMARY KEY, name string, brand string, price INT) WITH (KAFKA_TOPIC = 'pg.public.products', VALUE_FORMAT='AVRO', KEY_FORMAT='KAFKA');    
-
-Test if the table containes data:
-
-    SELECT * FROM products EMIT CHANGES;
-
+```sql
+SELECT * FROM products EMIT CHANGES;
+```
 ## Join the data from SQL server and Postgress
 
-Create the stream:
+Create the join stream:
 
-    CREATE stream CUSTOMERS_ORDERS_COMPLETE as
-        SELECT orderid, nickname, CUSTOMERS_ORDERS.name as name, surname, quantity, customerid, products.name as productname, brand, price
-            FROM CUSTOMERS_ORDERS
-            LEFT JOIN products ON products.id = CUSTOMERS_ORDERS.orderid;
+```sql   
+CREATE stream CUSTOMERS_ORDERS_COMPLETE as
+    SELECT 
+        orderid, 
+        nickname, 
+        CUSTOMERS_ORDERS.name as name, 
+        surname, 
+        quantity, 
+        customerid, 
+        products.name as productname, 
+        brand, 
+        price
+    FROM CUSTOMERS_ORDERS
+    LEFT JOIN products ON products.id = CUSTOMERS_ORDERS.orderid;
+```
 
-Check the events:
+Test the ```CUSTOMERS_ORDERS_COMPLETE``` stream:
 
+```sql   
     SELECT * FROM CUSTOMERS_ORDERS_COMPLETE EMIT CHANGES;
+```
 
-# Now let's keep generating orders
+# Test the end to end streaming pipeline
+
+Now let's keep generating orders
 
     docker exec -i jr-cli jr run -f 1000ms -l insert_orders|xargs -I{} docker exec  mssql-crm /opt/mssql-tools/bin/sqlcmd -U sa -P MSQLserver10! -Q "{}" -d crm
 

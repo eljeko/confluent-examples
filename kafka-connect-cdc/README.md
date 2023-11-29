@@ -381,18 +381,19 @@ At the end of this step you have the complete *Streaming Pipeline*
 # Test the end to end streaming pipeline
 
 Now check that mongodb contains the documents:
-
+```
     docker exec -i mongodb mongosh --eval 'db.orders.find();' ordersdb --username root --password rootpassword --authenticationDatabase admin
-
+```
 
 Now let's keep generating orders
-
+```
     docker exec -i jr-cli jr run -f 1000ms -l insert_orders|xargs -I{} docker exec  mssql-crm /opt/mssql-tools/bin/sqlcmd -U sa -P MSQLserver10! -Q "{}" -d crm
-
+```
 And count documents in mongodb while we are inserting new orders:
-    
+```    
     docker exec -i mongodb mongosh --eval 'db.orders.countDocuments();' ordersdb --username root --password rootpassword --authenticationDatabase admin
-
+```
 Or just count documents in a shell while loop:
-
+```
     while (true);do docker exec -i mongodb mongosh --eval 'db.orders.countDocuments();' ordersdb --username root --password rootpassword --authenticationDatabase admin|tail -n 1;sleep 3;done
+```    

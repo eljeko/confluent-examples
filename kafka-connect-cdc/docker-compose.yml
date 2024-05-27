@@ -1,0 +1,222 @@
+---
+version: '2'
+
+services:
+
+  broker:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    hostname: broker
+    container_name: broker
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://broker:9092,CONTROLLER://broker:29093'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TOOLS_LOG4J_LOGLEVEL: ERROR
+      CLUSTER_ID: 'QTnB2tAgTWa1ec5wYon2jg'
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:${CONFLUENT_VERSION}
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - broker
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:9092'
+
+  connect:
+    image: confluentinc/cp-kafka-connect:${CONFLUENT_VERSION}
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - schema-registry
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: 'broker:9092'      
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect      
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      ls: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+    command:
+      - bash
+      - -c
+      - |
+        echo "Installing Connector"
+        confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:${JDBC_CONNECTOR_VERSION}
+        confluent-hub install --no-prompt debezium/debezium-connector-postgresql:${POSTEGRES_CONNECTOR_VERSION}
+        confluent-hub install --no-prompt debezium/debezium-connector-sqlserver:${SQLSERVER_CONNECTOR_VERSION}
+        confluent-hub install --no-prompt mongodb/kafka-connect-mongodb:${MONGODB_CONNECTOR_VERSION}
+        #
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run &
+        #
+        sleep infinity
+
+  ksqldb-server:
+    image: confluentinc/cp-ksqldb-server:${KSQL_VERSION}
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    depends_on:
+      - broker
+      - schema-registry
+      - connect
+    volumes:
+      - ./extensions:/etc/ksqldb/ext
+    ports:
+      - "8088:8088"
+    environment:
+      KSQL_LISTENERS: "http://0.0.0.0:8088"
+      KSQL_BOOTSTRAP_SERVERS: "broker:9092"
+      KSQL_CONFIG_DIR: "/etc/ksqldb"
+      KSQL_KSQL_EXTENSION_DIR: "/etc/ksqldb/ext/"
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      KSQL_KSQL_CONNECT_URL: "http://connect:8083"
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_KSQL_STREAMS_AUTO_OFFSET_RESET: "earliest"
+      KSQL_KSQL_STREAMS_CACHE_MAX_BYTES_BUFFERING: "20000000"
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 1
+
+  ksqldb-cli:
+    image: confluentinc/cp-ksqldb-cli:${KSQL_VERSION}
+    container_name: ksqldb-cli
+    environment:
+      # workaround for WARNINIG errors on console in docker: sun.rmi.transport.tcp.TCPTransport$AcceptLoop run WARNING: RMI TCP Accept-0: accept loop for ServerSocket [...]
+      KSQL_LOG4J_OPTS: "-Djava.util.logging.config.file=/home/appuser/logging.properties"
+    depends_on:
+      - broker
+      - ksqldb-server
+    entrypoint: /bin/sh
+    tty: true
+    volumes:       
+      # workaround for WARNING on log
+      - ./logging.properties:/home/appuser/logging.properties
+
+  control-center:
+      image: confluentinc/cp-enterprise-control-center:${CONFLUENT_VERSION}
+      hostname: control-center
+      container_name: control-center
+      depends_on:
+        - broker
+        - schema-registry
+        - ksqldb-server
+        - connect
+      ports:
+        - "9021:9021"
+      environment:
+        CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:9092'
+        CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: 'http://connect:8083'
+        CONTROL_CENTER_CONNECT_HEALTHCHECK_ENDPOINT: '/connectors'
+        CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+        CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
+        CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+        CONTROL_CENTER_REPLICATION_FACTOR: 1
+        CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+        CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+        CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+        PORT: 9021
+
+###############################
+# Databases and Mongo Section #
+############################### 
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql-crm
+    ports:
+     - 1433:1433
+    environment:
+     - ACCEPT_EULA=Y
+     - MSSQL_PID=Standard
+     - SA_PASSWORD=MSQLserver10!
+     - MSSQL_AGENT_ENABLED=true
+    volumes:
+     - ./sql/msql-init.sql:/scripts/msql-init.sql
+    command:
+      - /bin/bash
+      - -c 
+      - |
+        # Launch MSSQL and send to background
+        /opt/mssql/bin/sqlservr &
+        # Wait 30 seconds for it to be available
+        # (lame, I know, but there's no nc available to start prodding network ports)
+        sleep 30
+        # Run every script in /scripts
+        # TODO set a flag so that this is only done once on creation, 
+        #      and not every time the container runs
+        for foo in /scripts/*.sql
+          do /opt/mssql-tools/bin/sqlcmd -U sa -P $$SA_PASSWORD -l 30 -e -i $$foo
+        done
+        # So that the container doesn't shut down, sleep this thread
+        sleep infinity
+ 
+  mongodb_container:
+    platform: linux/arm64
+    container_name: mongodb
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_DATABASE: ordersdb
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+      - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  postgres:
+    container_name: pg-products
+    image: quay.io/debezium/postgres:9.6
+    ports:
+     - "5432:5432"
+    environment:
+     - POSTGRES_USER=postgresuser
+     - POSTGRES_PASSWORD=postgrespw
+     - POSTGRES_DB=central_store
+    volumes: 
+    #- ./postgres-data:/var/lib/postgresql/data
+    # copy the sql script to create tables
+     - ./sql/pg-init.sql:/docker-entrypoint-initdb.d/init.sql      
+
+###############################
+# Datagen  JR container       #
+############################### 
+
+  jr-cli:
+      image: ugol/jr
+      container_name: jr-cli
+      entrypoint: /bin/sh
+      tty: true
+      volumes:
+          - ./templates/event_template.tpl:/home/jr/.jr/templates/event_template.tpl
+          - ./templates/insert_orders.tpl:/home/jr/.jr/templates/insert_orders.tpl
+
+
+volumes:
+  mongodb_data_container:          

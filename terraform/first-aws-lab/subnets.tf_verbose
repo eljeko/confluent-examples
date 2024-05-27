@@ -1,0 +1,48 @@
+resource "aws_subnet" "lab_az1" {
+  vpc_id = aws_vpc.lab.id
+
+  map_public_ip_on_launch = true
+
+  cidr_block = "10.0.1.0/24"
+
+  availability_zone_id = "eus1-az1"
+
+
+  tags = {
+    Name = "${var.owner}-Managed-az1"
+  }
+
+}
+
+resource "aws_subnet" "lab_az2" {
+  vpc_id = aws_vpc.lab.id
+
+  map_public_ip_on_launch = true
+
+  cidr_block = "10.0.2.0/24"
+
+  availability_zone_id = "eus1-az2"
+
+
+  tags = {
+    Name = "${var.owner}-Managed-az2"
+  }
+
+}
+
+resource "aws_subnet" "lab_az3" {
+  vpc_id = aws_vpc.lab.id
+
+  map_public_ip_on_launch = true
+
+  cidr_block = "10.0.3.0/24"
+
+  availability_zone_id = "eus1-az3"
+
+
+  tags = {
+    Name = "${var.owner}-Managed-az3"
+  }
+
+}
+
